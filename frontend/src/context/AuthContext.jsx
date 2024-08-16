@@ -40,41 +40,36 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await fetch("http://localhost:8000/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
+        const formData = new URLSearchParams();
+        formData.append('username', credentials.username);
+        formData.append('password', credentials.password);
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Token received:", data.access_token);
-        localStorage.setItem("token", data.access_token);
-        // Make sure to save user information if your backend sends it
-        const userResponse = await fetch("http://localhost:8000/verify-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${data.access_token}`,
-          },
+        const response = await fetch("http://localhost:8000/token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formData,
         });
-        const userData = await userResponse.json();
-        setUser(userData);
-        return { success: true };
-      } else {
-        const errorData = await response.json();
-        return { success: false, message: errorData.detail || "Login failed" };
-      }
+
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem("token", data.access_token);
+            // Fetch user info and set it
+            return { success: true };
+        } else {
+            const errorData = await response.json();
+            return { success: false, message: errorData.detail || "Login failed" };
+        }
     } catch (error) {
-      console.error("Login error:", error);
-      return {
-        success: false,
-        message: "An error occurred. Please try again.",
-      };
+        console.error("Login error:", error);
+        return {
+            success: false,
+            message: "An error occurred. Please try again.",
+        };
     }
-  };
+};
+
 
   const logout = () => {
     localStorage.removeItem("token");
