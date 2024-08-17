@@ -40,35 +40,48 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-        const formData = new URLSearchParams();
-        formData.append('username', credentials.username);
-        formData.append('password', credentials.password);
-
-        const response = await fetch("http://localhost:8000/token", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: formData,
+      const formData = new URLSearchParams();
+      formData.append('username', credentials.username);
+      formData.append('password', credentials.password);
+  
+      const response = await fetch("http://localhost:8000/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData,
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.access_token);
+  
+        // Fetch user info and set it
+        const userInfoResponse = await fetch("http://localhost:8000/user-info", {
+          headers: {
+            Authorization: `Bearer ${data.access_token}`,
+          },
         });
-
-        if (response.ok) {
-            const data = await response.json();
-            localStorage.setItem("token", data.access_token);
-            // Fetch user info and set it
-            return { success: true };
-        } else {
-            const errorData = await response.json();
-            return { success: false, message: errorData.detail || "Login failed" };
+  
+        if (userInfoResponse.ok) {
+          const userData = await userInfoResponse.json();
+          setUser(userData); // Set the user data
         }
+  
+        return { success: true };
+      } else {
+        const errorData = await response.json();
+        return { success: false, message: errorData.detail || "Login failed" };
+      }
     } catch (error) {
-        console.error("Login error:", error);
-        return {
-            success: false,
-            message: "An error occurred. Please try again.",
-        };
+      console.error("Login error:", error);
+      return {
+        success: false,
+        message: "An error occurred. Please try again.",
+      };
     }
-};
+  };
+  
 
 
   const logout = () => {

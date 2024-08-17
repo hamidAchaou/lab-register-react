@@ -39,7 +39,7 @@ const Login = () => {
   };
 
   const onSubmit = async (data) => {
-    console.log("Submitting:", data); 
+    console.log("Submitting:", data);
     const result = await login(data);
     if (result.success) {
       setAlert({
@@ -57,17 +57,16 @@ const Login = () => {
       if (Array.isArray(result.message)) {
         // Iterate over the array and concatenate the error messages
         errorMessage = result.message
-          .map((err) => `${err.loc.join(' -> ')}: ${err.msg}`)
-          .join('\n');
+          .map((err) => `${err.loc.join(" -> ")}: ${err.msg}`)
+          .join("\n");
       } else {
         // If it's not an array, use it as a string directly
         errorMessage = result.message;
       }
-  
+
       setAlert({ open: true, severity: "error", message: errorMessage });
     }
   };
-  
 
   return (
     <Layout title="Login">
